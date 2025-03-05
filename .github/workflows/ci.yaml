@@ -13,16 +13,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: OWASP Dependency-Check
-      uses: dependency-check/Dependency-Check_Action@main
-      with:
-        project: 'My Project'
-        path: '.'
-        format: 'HTML'
-        args: >
-          --failOnCVSS 0.1
-          --enableRetired
       
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -35,3 +25,13 @@ jobs:
         tags: demo-app:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'demo-app:latest'
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
